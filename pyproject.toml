@@ -6,6 +6,10 @@ authors = ["Arash Fatahzade <fatahzade@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+Django = "^3.1.5"
+djangorestframework = "^3.12.2"
+django-allauth = "^0.44.0"
+django-rest-auth = "^0.9.5"
 
 [tool.poetry.dev-dependencies]
 
