@@ -1,6 +1,4 @@
 from django.contrib import admin
-from django.contrib.auth.admin import Group
-from django.contrib.auth.admin import GroupAdmin
 from django.contrib.auth.admin import UserAdmin
 from django.utils.text import gettext_lazy as _
 

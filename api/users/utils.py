@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from django.conf import settings
 from rest_framework_simplejwt.tokens import RefreshToken
 
 
