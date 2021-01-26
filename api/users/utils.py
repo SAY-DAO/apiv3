@@ -1,3 +1,8 @@
+from datetime import datetime
+
+from django.conf import settings
+from rest_framework_simplejwt.tokens import RefreshToken
+
 
 def get_client_ip(request):
     """
@@ -17,3 +22,12 @@ def get_client_ip(request):
     else:
         ip = request.META.get("REMOTE_ADDR")
     return ip
+
+
+def get_tokens_for_user(user):
+    refresh = RefreshToken.for_user(user)
+
+    return {
+        'refresh': str(refresh),
+        'access': str(refresh.access_token),
+    }

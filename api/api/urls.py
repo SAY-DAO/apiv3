@@ -17,14 +17,18 @@ from django.conf.urls import url
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-
+from rest_framework_simplejwt.views import TokenRefreshSlidingView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
 
     # users
     path('api/users/', include('users.urls')),
-    
+
+    # JWT
+    path('api/token/refresh/', TokenRefreshSlidingView.as_view(),
+         name='token_refresh'),
+
     # openapi
     path('api/schema.json', SpectacularAPIView.as_view(), name='schema'),
     path('api/doc/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),

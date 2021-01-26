@@ -14,7 +14,7 @@ from rest_framework.views import APIView
 
 from .models import User, AuthTransaction
 from .serializers import LoginSerializer, UserSerializer
-from .utils import get_client_ip
+from .utils import get_client_ip, get_tokens_for_user
 
 
 class LoginView(APIView):
@@ -25,24 +25,15 @@ class LoginView(APIView):
 
     def validated(self, serialized_data, *args, **kwargs):
         user = serialized_data.validated_data.get("user") or self.request.user
-        token = serialized_data.validated_data.get("token")
-        response_data = {
-            'token': token,
-            'user': UserSerializer(user,context={'request': self.request},).data
-        }
-        response = Response(response_data)
-        # if api_settings.JWT_AUTH_COOKIE:
-        expiration = datetime.utcnow() + timedelta(hours=settings.JWT_EXPIRATION_DELTA)
-        response.set_cookie(
-            settings.JWT_AUTH_COOKIE, token, expires=expiration, httponly=True
-        )
+        tokens = get_tokens_for_user(user)
+        response = Response(tokens)
 
         user.last_login = datetime.now()
         user.save()
-        #
+
         AuthTransaction(
             created_by=user,
-            token=token,
+            token=tokens['access'],
             ip_address=get_client_ip(self.request),
             session=user.get_session_auth_hash(),
         ).save()
