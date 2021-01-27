@@ -41,7 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.sites',
-
+    'v2',
     'users',
 
     'drf_spectacular',
@@ -97,7 +97,7 @@ DATABASES = {
         'HOST': 'localhost',
         'PORT': '5432',
     },
-    'old': {
+    'v2': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2',
         'NAME': 'say',
         'USER': 'postgres',
@@ -107,6 +107,7 @@ DATABASES = {
     },
 }
 
+DATABASE_ROUTERS = ['v2.routers.V2Router']
 
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators

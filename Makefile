@@ -9,10 +9,11 @@ help:		    ## Display this help message
 migrate: 		## Migrate db
 	poetry run ./api/manage.py migrate
 
-.PHONY: makemigrates
-makemigrates: 	## Make migrations
-	poetry run ./api/manage.py makemigrates
+.PHONY: makemigrations
+makemigrations: 	## Make migrations
+	poetry run ./api/manage.py makemigrations
 
 .PHONY: server
 server: 		## Run server
 	poetry run ./api/manage.py runserver
+

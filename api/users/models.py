@@ -9,22 +9,22 @@ from .managers import UserManager
 
 class User(AbstractUser):
     username_regex = RegexValidator(
-        regex=r'[A-Za-z0-9][.A-Za-z0-9]{3,11}$',
-        message='username must start with letter and can have dot in it, must be 4 to 12 characters length',
+        regex=r'[A-Za-z0-9][.A-Za-z0-9]{3,21}$',
+        message='username must start with letter and can have dot in it, must be 4 to 22 characters length',
     )
     username = models.CharField(
         validators=[username_regex],
         blank=False,
         null=False,
         unique=True,
-        max_length=12,
+        max_length=22,
     )
 
     normalized_username = models.CharField(
         blank=False,
         null=False,
         unique=True,
-        max_length=12,
+        max_length=22,
     )
 
     phone_regex = RegexValidator(
@@ -44,6 +44,16 @@ class User(AbstractUser):
     is_email_verified = models.BooleanField(default=False, null=True)
 
     objects = UserManager()
+
+    @staticmethod
+    def import_from_v2(*args):
+        from v2 import models as v2_models
+
+        for v2_user in v2_models.User.objects.all():
+            user = User()
+            user.username = v2_user.username
+            user.normalized_username = v2_user.username.lower()
+            user.save()
 
 
 class AuthTransaction(models.Model):
@@ -103,3 +113,4 @@ class OTPValidation(models.Model):
     class Meta:
         verbose_name = _('OTP Validation')
         verbose_name_plural = _('OTP Validations')
+
