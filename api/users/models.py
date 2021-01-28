@@ -1,3 +1,5 @@
+from hashlib import sha256
+
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -5,6 +7,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from .constants import EMAIL, DESTINATION_CHOICES
 from .managers import UserManager
+from .utils import make_password, check_password
 
 
 class User(AbstractUser):
@@ -45,6 +48,15 @@ class User(AbstractUser):
 
     objects = UserManager()
 
+    # overwriting to be backward compatible with 2
+    def check_password(self, raw_password):
+        return check_password(self.password, raw_password)
+
+    # overwriting to be backward compatible with 2
+    def set_password(self, raw_password):
+        self.password = make_password(raw_password)
+        self._password = raw_password
+
     @staticmethod
     def import_from_v2(*args):
         from v2 import models as v2_models
@@ -53,6 +65,7 @@ class User(AbstractUser):
             user = User()
             user.username = v2_user.username
             user.normalized_username = v2_user.username.lower()
+            user.password = v2_user.field_password
             user.save()
 
 
