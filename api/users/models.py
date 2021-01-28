@@ -1,5 +1,3 @@
-from hashlib import sha256
-
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -22,7 +20,6 @@ class User(AbstractUser):
         unique=True,
         max_length=22,
     )
-
     normalized_username = models.CharField(
         blank=False,
         null=False,
@@ -43,7 +40,7 @@ class User(AbstractUser):
     )
     is_phone_verified = models.BooleanField(default=False)
 
-    email = models.EmailField(blank=True)
+    email = models.EmailField(blank=True,null=True)
     is_email_verified = models.BooleanField(default=False, null=True)
 
     objects = UserManager()
@@ -60,12 +57,23 @@ class User(AbstractUser):
     @staticmethod
     def import_from_v2(*args):
         from v2 import models as v2_models
+        from django.utils.timezone import make_aware
 
         for v2_user in v2_models.User.objects.all():
             user = User()
+            user.id = v2_user.id
             user.username = v2_user.username
             user.normalized_username = v2_user.username.lower()
+            user.phone = v2_user.phone_number
+            user.is_phone_verified = v2_user.is_phonenumber_verified
+            user.email = v2_user.emailaddress
+            user.is_email_verified = v2_user.is_email_verified
             user.password = v2_user.field_password
+            user.first_name = v2_user.firstname
+            user.last_name = v2_user.lastname
+            user.last_login = make_aware(v2_user.lastlogin)
+            user.date_joined = make_aware(v2_user.created)
+            user.is_active = True
             user.save()
 
 
