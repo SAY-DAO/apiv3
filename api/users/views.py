@@ -1,20 +1,20 @@
 from datetime import datetime
 
-from rest_framework import status
+from rest_framework import status, viewsets, mixins, permissions
 from rest_framework.permissions import AllowAny
 from rest_framework.renderers import JSONRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import AuthTransaction
-from .serializers import LoginSerializer
+from .models import AuthTransaction, User
+from .serializers import LoginSerializer, UserSerializer
 from .utils import get_client_ip, get_tokens_for_user
 
 
 class LoginView(APIView):
 
     renderer_classes = (JSONRenderer,)
-    permission_classes = (AllowAny,)
+    permission_classes = (permissions.AllowAny,)
     serializer_class = LoginSerializer
 
     def validated(self, serialized_data, *args, **kwargs):
@@ -43,3 +43,13 @@ class LoginView(APIView):
                 serialized_data.errors,
                 status=status.HTTP_422_UNPROCESSABLE_ENTITY
             )
+
+
+class UserViewSet(mixins.ListModelMixin,
+                     mixins.RetrieveModelMixin,
+                     mixins.UpdateModelMixin,
+                     viewsets.GenericViewSet):
+
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    permission_classes = (permissions.IsAuthenticatedOrReadOnly,)
