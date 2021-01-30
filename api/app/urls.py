@@ -21,6 +21,9 @@ from rest_framework_simplejwt.views import TokenRefreshSlidingView
 urlpatterns = [
     path('admin/', admin.site.urls),
 
+    # auth
+    path('api/auth/', include('authentication.urls')),
+
     # users
     path('api/users/', include('users.urls')),
 

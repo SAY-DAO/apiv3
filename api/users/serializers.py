@@ -1,4 +1,3 @@
-from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from .models import User
@@ -18,25 +17,3 @@ class UserSerializer(serializers.ModelSerializer):
         )
         read_only_fields = ('is_superuser', 'is_staff')
         extra_kwargs = {'password': {'write_only': True}}
-
-
-class LoginSerializer(serializers.Serializer):
-    username = serializers.CharField()
-    password = serializers.CharField()
-
-    def validate(self, attrs):
-        try:
-            user = User.objects.get(normalized_username=attrs['username'].lower())
-        except User.DoesNotExist:
-            raise serializers.ValidationError(_('Invalid username or password'))
-
-        if not user.check_password(attrs['password']):
-            raise serializers.ValidationError(_('Invalid username or password'))
-
-        if not user.is_active:
-            raise serializers.ValidationError(_('Confirm email or password`'))
-
-        return {
-            'token': 1,
-            'user': user
-        }
