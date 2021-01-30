@@ -16,7 +16,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularAPIView, SpectacularRedocView, SpectacularSwaggerView
-from rest_framework_simplejwt.views import TokenRefreshSlidingView
+from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -28,8 +28,7 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
 
     # JWT
-    path('api/token/refresh/', TokenRefreshSlidingView.as_view(),
-         name='token_refresh'),
+    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 
     # openapi
     path('api/schema.json', SpectacularAPIView.as_view(), name='schema'),
