@@ -2,7 +2,8 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from users.models import User
-from .constants import DESTINATION_CHOICES, EMAIL
+from .constants import DESTINATION_CHOICES
+from .constants import EMAIL
 
 
 class AuthTransaction(models.Model):
@@ -28,38 +29,41 @@ class AuthTransaction(models.Model):
 
 
 class OTPValidation(models.Model):
-    otp = models.CharField(verbose_name=_('OTP Code'), max_length=10)
+    otp = models.CharField(
+        verbose_name=_('OTP Code'),
+        max_length=10,
+    )
     destination = models.CharField(
         verbose_name=_('Destination Address (Mobile/EMail)'),
         max_length=254,
         unique=True,
     )
     create_date = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
-    update_date = models.DateTimeField(verbose_name=_('Date Modified'), auto_now=True)
-    is_validated = models.BooleanField(verbose_name=_('Is Validated'), default=False)
+    verify_date = models.DateTimeField(verbose_name=_('Date Verified'), auto_now=True)
+    is_verified = models.BooleanField(verbose_name=_('Is Verified'), default=False)
     validate_attempt = models.IntegerField(
         verbose_name=_('Attempted Validation'),
         default=3,
     )
-    prop = models.CharField(
-        verbose_name=_('Destination Property'),
+    destination_type = models.CharField(
+        verbose_name=_('Destination Type'),
         default=EMAIL,
-        max_length=3,
+        max_length=10,
         choices=DESTINATION_CHOICES,
     )
-    send_counter = models.IntegerField(verbose_name=_('OTP Sent Counter'), default=0)
-    sms_id = models.CharField(
-        verbose_name=_('SMS ID'),
-        max_length=254,
-        null=True,
-        blank=True,
+    secret = models.CharField(
+        verbose_name=_('OTP Secret'),
+        max_length=128,
     )
-    reactive_at = models.DateTimeField(verbose_name=_('ReActivate Sending OTP'))
+    send_counter = models.IntegerField(verbose_name=_('OTP Sent Counter'), default=0)
 
     def __str__(self):
-        return self.destination
+        return f'{self.destination} code: {self.otp}'
 
     class Meta:
         verbose_name = _('OTP Validation')
         verbose_name_plural = _('OTP Validations')
 
+    @classmethod
+    def import_from_v2(cls, *args):
+        pass

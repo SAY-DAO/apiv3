@@ -1,3 +1,3 @@
-EMAIL = 'E'
-MOBILE = 'M'
-DESTINATION_CHOICES = [(EMAIL, 'EMail Address'), (MOBILE, 'Mobile Number')]
+EMAIL = 'email'
+PHONE = 'phone'
+DESTINATION_CHOICES = [(EMAIL, 'EMail Address'), (PHONE, 'Phone Number')]

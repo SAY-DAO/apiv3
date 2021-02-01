@@ -3,7 +3,8 @@ from django.core.validators import RegexValidator
 from django.db import models
 
 from .managers import UserManager
-from .utils import make_password, check_password
+from .utils import check_password
+from .utils import make_password
 
 
 class User(AbstractUser):
@@ -52,13 +53,13 @@ class User(AbstractUser):
         self.password = make_password(raw_password)
         self._password = raw_password
 
-    @staticmethod
-    def import_from_v2(*args):
+    @classmethod
+    def import_from_v2(cls, *args):
         from v2 import models as v2_models
         from django.utils.timezone import make_aware
 
         for v2_user in v2_models.User.objects.all():
-            user = User()
+            user = cls()
             user.id = v2_user.id
             user.username = v2_user.username
             user.normalized_username = v2_user.username.lower()

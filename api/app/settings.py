@@ -15,7 +15,6 @@ from pathlib import Path
 
 from django.utils.translation import gettext_lazy as _
 
-
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -70,6 +69,14 @@ REST_FRAMEWORK = {
     'JSON_UNDERSCOREIZE': {
         'no_underscore_before_number': True,
     },
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'send_otp': '1/minute',
+        'verify_otp': '5/minute'
+    }
+
 }
 
 MIDDLEWARE = [
@@ -133,6 +140,17 @@ DATABASES = {
 
 DATABASE_ROUTERS = ['v2.routers.V2Router']
 
+# Cache
+CACHES = {
+    "default": {
+        "BACKEND": "django_redis.cache.RedisCache",
+        "LOCATION": "redis://127.0.0.1:6379/1",
+        "OPTIONS": {
+            "CLIENT_CLASS": "django_redis.client.DefaultClient",
+        }
+    }
+}
+
 # Password validation
 # https://docs.djangoproject.com/en/3.1/ref/settings/#auth-password-validators
 
@@ -153,7 +171,6 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.authenticate.password_validation.NumericPasswordValidator',
     },
 ]
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/3.1/topics/i18n/
@@ -185,9 +202,12 @@ STATIC_URL = '/static/'
 
 SITE_ID = 1
 
-# Custom user
-
+# User
 AUTH_USER_MODEL = 'users.User'
+
+# Authentication
+OTP_LIFETIME = 5 * 60  # 5 min
+OTP_DIGITS = 6
 
 # email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
@@ -224,7 +244,6 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_BROKER_TRANSPORT_OPTIONS = {'visibility_timeout': 3600}  # 1 hour, must be >= lognest task delay
 
 # DRF-SPECTACULAR
-
 SPECTACULAR_SETTINGS = {
     'CAMELIZE_NAMES': True,
     'POSTPROCESSING_HOOKS': [

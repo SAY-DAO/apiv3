@@ -2,7 +2,8 @@
 
 import django.core.validators
 import django.utils.timezone
-from django.db import migrations, models
+from django.db import migrations
+from django.db import models
 
 from users.models import User
 

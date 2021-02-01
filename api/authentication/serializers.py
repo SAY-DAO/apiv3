@@ -2,6 +2,7 @@ from django.utils.translation import ugettext_lazy as _
 from rest_framework import serializers
 
 from users.models import User
+from .models import OTPValidation
 from .utils import get_tokens_for_user
 
 
@@ -25,3 +26,14 @@ class LoginSerializer(serializers.Serializer):
 
         self.user = user
         return get_tokens_for_user(user)
+
+
+class OTPSerializer(serializers.Serializer):
+    destination = serializers.CharField(max_length=15, write_only=True)
+
+
+class VerifyOTPSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = OTPValidation
+        fields = ['destination', 'otp']

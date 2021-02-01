@@ -7,7 +7,7 @@ from .models import OTPValidation
 class OTPValidationAdmin(admin.ModelAdmin):
     """OTP Validation Admin"""
 
-    list_display = ("destination", "otp", "prop")
+    list_display = ("destination", "otp", "destination_type")
 
 
 class AuthTransactionAdmin(admin.ModelAdmin):

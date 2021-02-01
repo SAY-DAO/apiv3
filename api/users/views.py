@@ -1,8 +1,6 @@
-from rest_framework import viewsets, mixins, permissions
-
-from .models import User
-from .serializers import UserSerializer
-from rest_framework import viewsets, mixins, permissions
+from rest_framework import mixins
+from rest_framework import permissions
+from rest_framework import viewsets
 
 from .models import User
 from .serializers import UserSerializer
