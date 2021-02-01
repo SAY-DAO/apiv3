@@ -62,6 +62,7 @@ REST_FRAMEWORK = {
         'djangorestframework_camel_case.render.CamelCaseBrowsableAPIRenderer',
     ),
     'DEFAULT_PARSER_CLASSES': (
+        'rest_framework.parsers.JSONParser',
         'djangorestframework_camel_case.parser.CamelCaseFormParser',
         'djangorestframework_camel_case.parser.CamelCaseMultiPartParser',
         'djangorestframework_camel_case.parser.CamelCaseJSONParser',
@@ -229,5 +230,6 @@ SPECTACULAR_SETTINGS = {
     'POSTPROCESSING_HOOKS': [
         'drf_spectacular.contrib.djangorestframework_camel_case.camelize_serializer_fields',
     ],
+    'SCHEMA_PATH_PREFIX': r'/api/v[0-9]+',
 }
 

@@ -1,6 +1,5 @@
 from django.utils.datetime_safe import datetime
-from rest_framework import permissions, status
-from rest_framework.renderers import JSONRenderer
+from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -11,9 +10,9 @@ from .utils import get_client_ip
 
 class LoginView(APIView):
 
-    renderer_classes = (JSONRenderer,)
-    permission_classes = (permissions.AllowAny,)
     serializer_class = LoginSerializer
+    permission_classes = ()
+    authentication_classes = ()
 
     def validated(self, serialized_data, *args, **kwargs):
         user = serialized_data.user

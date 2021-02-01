@@ -22,13 +22,17 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # auth
-    path('api/auth/', include('authentication.urls')),
+    path('api/', include([
+        path('v3/', include([
+            path('auth/', include('authentication.urls')),
 
-    # users
-    path('api/users/', include('users.urls')),
+            # users
+            path('users/', include('users.urls')),
 
-    # JWT
-    path('api/auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+            # JWT
+            path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+        ]))
+    ])),
 
     # openapi
     path('api/schema.json', SpectacularAPIView.as_view(), name='schema'),
