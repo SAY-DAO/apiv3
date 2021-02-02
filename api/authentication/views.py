@@ -1,5 +1,7 @@
 import pyotp
+from django.conf import settings
 from django.core import exceptions
+from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.utils.datetime_safe import datetime
 from django.utils.translation import ugettext_lazy as _
@@ -93,6 +95,15 @@ class OTPView(views.APIView):
             )
 
         otp.save()
+
+        if otp.destination_type == EMAIL:
+            send_mail(
+                _('SAY Email Verification'),
+                _('SAY Email Verification: %(code)s' % {'code': otp.otp}),
+                settings.VERIFICATION_EMAIL_FROM,
+                [otp.destination],
+                fail_silently=False,
+            )
 
         return Response(_('Verification sent to %(destination)s.' % {'destination': destination}))
 

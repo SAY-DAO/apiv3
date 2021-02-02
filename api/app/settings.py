@@ -211,6 +211,8 @@ OTP_DIGITS = 6
 
 # email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+VERIFICATION_EMAIL_FROM = 'confirm@say.company'
+
 
 # JWT
 SIMPLE_JWT = {
