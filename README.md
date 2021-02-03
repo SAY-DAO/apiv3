@@ -4,7 +4,16 @@ Refactored version of the backend using django
 ## TODOs
 - Readme
 - Setup the project
-- Setup user apis and user types
+- **User stories**
+    - ✅ As a `logged-out user`, I can `login` to the system and get my `access token`.
+    - ✅ As a `user`, I can `renew` my `access token` using `refresh token`.
+    - ☐ As a `user`, I can `logout` using my `access/refresh token` so my token will be `blacklisted`.
+    - ✅ As an `anon user`, I can `request to veirfy` my `email/phonenumber`, an `otp code` will sent to me.
+    - ✅ As an `anon user`, I can `veirfy` my `email/phonenumber` using `otp code`.
+    - ☐ As an `anon user`, I can `register` as an `app user` using my `verified email/phonenumber`.
+    - ☐ As a `logged-out user`, I can `reset` my `password` using `otp code` sent to my `email/phone`.
+    - ...
+
 - Refactoring panel apis
 - Refactoring app apis
 - Migrate db
