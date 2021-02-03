@@ -95,6 +95,7 @@ class OTPView(views.APIView):
                 destination_type=destination_type,
             )
 
+        otp.send_counter += 1
         otp.save()
 
         if otp.destination_type == EMAIL:
@@ -114,10 +115,40 @@ class OTPView(views.APIView):
         return Response(_('Verification sent to %(destination)s.' % {'destination': destination}))
 
 
-class VerifyOTPViewSet(mixins.CreateModelMixin,
-                       viewsets.GenericViewSet):
+class VerifyOTPView(views.APIView):
     serializer_class = serializers.VerifyOTPSerializer
     permission_classes = ()
     authentication_classes = ()
     throttle_scope = 'verify_otp'
 
+    def post(self, request):
+        serialized_data = self.serializer_class(data=request.data)
+
+        if not serialized_data.is_valid():
+            return Response(
+                serialized_data.errors,
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        destination = serialized_data.validated_data['destination']
+        code = serialized_data.validated_data['otp']
+
+        try:
+            otp = OTPValidation.objects.get(destination=destination)
+        except OTPValidation.DoesNotExists:
+            return Response(
+                {'destination': _('destination is not a valid email/phone.')},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        if not otp.is_valid(code):
+            return Response(
+                {'code': _('OTP code is invalid.')},
+                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+            )
+
+        otp.is_verified = True
+        otp.verified_date = datetime.utcnow()
+        otp.save()
+
+        return Response(_('%(destination)s verified.' % {'destination': destination}))

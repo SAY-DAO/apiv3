@@ -74,7 +74,7 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'send_otp': '100/minute',
-        'verify_otp': '5/minute'
+        'verify_otp': '50/minute'
     }
 
 }

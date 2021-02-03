@@ -32,8 +32,6 @@ class OTPSerializer(serializers.Serializer):
     destination = serializers.CharField(max_length=15, write_only=True)
 
 
-class VerifyOTPSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = OTPValidation
-        fields = ['destination', 'otp']
+class VerifyOTPSerializer(serializers.Serializer):
+    destination = serializers.CharField(max_length=15, write_only=True)
+    otp = serializers.CharField(max_length=10, write_only=True)

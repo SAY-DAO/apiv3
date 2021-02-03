@@ -1,3 +1,5 @@
+import pyotp
+from django.conf import settings
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
@@ -21,7 +23,7 @@ class AuthTransaction(models.Model):
     created_by = models.ForeignKey(to=User, on_delete=models.PROTECT)
 
     def __str__(self):
-        return str(self.created_by.name) + ' | ' + str(self.created_by.username)
+        return f'{self.created_by.name} | {self.created_by.username}'
 
     class Meta:
         verbose_name = _('Authentication Transaction')
@@ -39,12 +41,8 @@ class OTPValidation(models.Model):
         unique=True,
     )
     create_date = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
-    verify_date = models.DateTimeField(verbose_name=_('Date Verified'), auto_now=True)
+    verify_date = models.DateTimeField(verbose_name=_('Date Verified'))
     is_verified = models.BooleanField(verbose_name=_('Is Verified'), default=False)
-    validate_attempt = models.IntegerField(
-        verbose_name=_('Attempted Validation'),
-        default=3,
-    )
     destination_type = models.CharField(
         verbose_name=_('Destination Type'),
         default=EMAIL,
@@ -64,6 +62,15 @@ class OTPValidation(models.Model):
         verbose_name = _('OTP Validation')
         verbose_name_plural = _('OTP Validations')
 
+    def is_valid(self, code):
+        totp = pyotp.TOTP(
+            self.secret,
+            digits=settings.OTP_DIGITS,
+            interval=settings.OTP_LIFETIME,
+        )
+        return totp.verify(code)
+
     @classmethod
     def import_from_v2(cls, *args):
         pass
+
