@@ -72,7 +72,6 @@ class OTPView(views.APIView):
 
         try:
             otp = OTPValidation.objects.get(destination=destination)
-            otp.otp = generate_otp(otp.secret)
         except OTPValidation.DoesNotExist:
             try:
                 validate_email(destination)
@@ -90,7 +89,6 @@ class OTPView(views.APIView):
             secret = pyotp.random_base32()
             otp = OTPValidation(
                 secret=secret,
-                otp=generate_otp(secret),
                 destination=destination,
                 destination_type=destination_type,
             )
@@ -98,17 +96,19 @@ class OTPView(views.APIView):
         otp.send_counter += 1
         otp.save()
 
+        code = generate_otp(otp.secret)
+
         if otp.destination_type == EMAIL:
             send_mail(
                 _('SAY Email Verification'),
-                _('SAY Email Verification: %(code)s' % {'code': otp.otp}),
+                _('SAY Email Verification: %(code)s' % {'code': code}),
                 settings.VERIFICATION_EMAIL_FROM,
                 [otp.destination],
                 fail_silently=False,
             )
         else:
             send_sms(
-                _('SAY verification code: %(code)s' % {'code': otp.otp}),
+                _('SAY verification code: %(code)s' % {'code': code}),
                 otp.destination,
             )
 

@@ -5,7 +5,7 @@ from django.utils.translation import ugettext_lazy as _
 
 from users.models import User
 from .constants import DESTINATION_CHOICES
-from .constants import EMAIL
+from .constants import EMAIL, PHONE
 
 
 class AuthTransaction(models.Model):
@@ -31,10 +31,6 @@ class AuthTransaction(models.Model):
 
 
 class OTPValidation(models.Model):
-    otp = models.CharField(
-        verbose_name=_('OTP Code'),
-        max_length=10,
-    )
     destination = models.CharField(
         verbose_name=_('Destination Address (Mobile/EMail)'),
         max_length=254,
@@ -56,7 +52,7 @@ class OTPValidation(models.Model):
     send_counter = models.IntegerField(verbose_name=_('OTP Sent Counter'), default=0)
 
     def __str__(self):
-        return f'{self.destination} code: {self.otp}'
+        return f'{self.destination} otp'
 
     class Meta:
         verbose_name = _('OTP Validation')
@@ -72,5 +68,31 @@ class OTPValidation(models.Model):
 
     @classmethod
     def import_from_v2(cls, *args):
-        pass
+        from v2 import models as v2_models
+        from django.utils.timezone import make_aware
+        v2_user: v2_models.User
 
+        for v2_user in v2_models.User.objects.all():
+            if v2_user.is_email_verified:
+                otp = cls(
+                    destination=v2_user.emailaddress,
+                    is_verified=True,
+                    destination_type=EMAIL,
+                    verify_date=make_aware(v2_user.created),
+                    create_date=make_aware(v2_user.created),
+                    send_counter=1,
+                    secret=pyotp.random_base32(),
+                )
+                otp.save()
+
+            if v2_user.is_phonenumber_verified:
+                otp = cls(
+                    destination=v2_user.phone_number,
+                    is_verified=True,
+                    destination_type=PHONE,
+                    verify_date=make_aware(v2_user.created),
+                    create_date=make_aware(v2_user.created),
+                    send_counter=1,
+                    secret=pyotp.random_base32(),
+                )
+                otp.save()
