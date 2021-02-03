@@ -73,7 +73,7 @@ REST_FRAMEWORK = {
         'rest_framework.throttling.ScopedRateThrottle',
     ],
     'DEFAULT_THROTTLE_RATES': {
-        'send_otp': '1/minute',
+        'send_otp': '100/minute',
         'verify_otp': '5/minute'
     }
 
@@ -213,6 +213,8 @@ OTP_DIGITS = 6
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 VERIFICATION_EMAIL_FROM = 'confirm@say.company'
 
+# SMS
+SMS_BACKEND = 'common.sms.backends.console.ConsoleSMSBackend'
 
 # JWT
 SIMPLE_JWT = {

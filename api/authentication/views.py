@@ -11,6 +11,7 @@ from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from common.sms import send_sms
 from users.models import User
 from . import serializers
 from .constants import EMAIL
@@ -103,6 +104,11 @@ class OTPView(views.APIView):
                 settings.VERIFICATION_EMAIL_FROM,
                 [otp.destination],
                 fail_silently=False,
+            )
+        else:
+            send_sms(
+                _('SAY verification code: %(code)s' % {'code': otp.otp}),
+                otp.destination,
             )
 
         return Response(_('Verification sent to %(destination)s.' % {'destination': destination}))
