@@ -13,7 +13,7 @@ Refactored version of the backend using django
     - ☐ As an `anon user`, I can `register` as an `app user` using my `verified email/phonenumber`.
     - ☐ As a `logged-out user`, I can `reset` my `password` using `otp code` sent to my `email/phone`.
     - ☐ As a `logged-out user`, I can `reset` my `password` using `otp code` sent to my `email/phone`.
-    - ✅ As an `anon user`, I can `search` for `childs`.
+    - ☐ As an `anon user`, I can `search` for `childs`.
 
     - ...
 
