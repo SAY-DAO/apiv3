@@ -14,6 +14,7 @@ Refactored version of the backend using django
     - ☐ As a `logged-out user`, I can `reset` my `password` using `otp code` sent to my `email/phone`.
     - ☐ As a `logged-out user`, I can `reset` my `password` using `otp code` sent to my `email/phone`.
     - ☐ As an `anon user`, I can `search` for `childs`.
+    - ☐ As an `user`, I can `get` my `dashboard`.
 
     - ...
 
