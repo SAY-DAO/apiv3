@@ -1,7 +1,7 @@
 import pyotp
 from django.conf import settings
 from django.db import models
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 
 from users.models import User
 from .constants import DESTINATION_CHOICES
@@ -37,7 +37,7 @@ class OTPValidation(models.Model):
         unique=True,
     )
     create_date = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
-    verify_date = models.DateTimeField(verbose_name=_('Date Verified'))
+    verify_date = models.DateTimeField(verbose_name=_('Date Verified'), null=True)
     is_verified = models.BooleanField(verbose_name=_('Is Verified'), default=False)
     destination_type = models.CharField(
         verbose_name=_('Destination Type'),

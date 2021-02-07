@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
+from django.utils.text import slugify
 
 from .managers import UserManager
 from .utils import check_password
@@ -19,7 +20,7 @@ class User(AbstractUser):
         unique=True,
         max_length=22,
     )
-    normalized_username = models.CharField(
+    slug_username = models.CharField(
         blank=False,
         null=False,
         unique=True,
@@ -39,19 +40,23 @@ class User(AbstractUser):
     )
     is_phone_verified = models.BooleanField(default=False)
 
-    email = models.EmailField(blank=True,null=True)
+    email = models.EmailField(blank=True,null=True, unique=True)
     is_email_verified = models.BooleanField(default=False, null=True)
 
     objects = UserManager()
 
-    # overwriting to be backward compatible with 2
+    # overwriting to be backward compatible with v2
     def check_password(self, raw_password):
         return check_password(self.password, raw_password)
 
-    # overwriting to be backward compatible with 2
+    # overwriting to be backward compatible with v2
     def set_password(self, raw_password):
         self.password = make_password(raw_password)
         self._password = raw_password
+
+    def save(self, *args, **kwargs):
+        self.slug_username = slugify(self.username)
+        super().save(*args, **kwargs)
 
     @classmethod
     def import_from_v2(cls, *args):
@@ -62,7 +67,7 @@ class User(AbstractUser):
             user = cls()
             user.id = v2_user.id
             user.username = v2_user.username
-            user.normalized_username = v2_user.username.lower()
+            user.slug_username = v2_user.username.lower()
             user.phone = v2_user.phone_number
             user.is_phone_verified = v2_user.is_phonenumber_verified
             user.email = v2_user.emailaddress

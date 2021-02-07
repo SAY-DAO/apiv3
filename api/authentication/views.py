@@ -4,7 +4,7 @@ from django.core import exceptions
 from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.utils.datetime_safe import datetime
-from django.utils.translation import ugettext_lazy as _
+from django.utils.translation import gettext_lazy as _
 from rest_framework import mixins
 from rest_framework import status
 from rest_framework import views
@@ -152,3 +152,11 @@ class VerifyOTPView(views.APIView):
         otp.save()
 
         return Response(_('%(destination)s verified.' % {'destination': destination}))
+
+
+class RegisterViewSet(mixins.CreateModelMixin,
+                      viewsets.GenericViewSet):
+    queryset = User.objects.all()
+    serializer_class = serializers.RegisterSerializer
+    permission_classes = ()
+    authentication_classes = ()

@@ -7,7 +7,7 @@ from .models import User
 
 class DRFUserAdmin(UserAdmin):
     fieldsets = (
-        (None, {"fields": ("username", "password", "normalized_username")}),
+        (None, {"fields": ("username", "password", "slug_username")}),
         (_("Personal info"), {"fields": ("email", "phone")}),
         (
             _("Permissions"),

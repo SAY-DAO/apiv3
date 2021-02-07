@@ -1,17 +1,19 @@
 from django.contrib.auth.base_user import BaseUserManager
-from django.utils.translation import ugettext_lazy as _
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 
 class UserManager(BaseUserManager):
     def create_user(self, email, password, username, **extra_fields):
         if not email:
             raise ValueError(_('The Email must be set'))
+
         email = self.normalize_email(email)
-        normalized_username = username.lower()
+        slug_username = slugify(username)
         user = self.model(
             email=email,
             username=username,
-            normalized_username=normalized_username,
+            slug_username=slug_username,
             **extra_fields,
         )
         user.set_password(password)
@@ -27,4 +29,5 @@ class UserManager(BaseUserManager):
             raise ValueError(_('Superuser must have is_staff=True.'))
         if extra_fields.get('is_superuser') is not True:
             raise ValueError(_('Superuser must have is_superuser=True.'))
+
         return self.create_user(email, password, **extra_fields)
