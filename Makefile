@@ -17,3 +17,7 @@ makemigrations: 	## Make migrations
 server: 		## Run server
 	poetry run ./api/manage.py runserver
 
+.PHONY: test
+test: 		## Run tests
+	poetry run ./api/manage.py test
+

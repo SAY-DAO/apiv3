@@ -68,6 +68,5 @@ class OTPSerializer(serializers.Serializer):
     destination = serializers.CharField(max_length=200, write_only=True)
 
 
-class VerifyOTPSerializer(serializers.Serializer):
-    destination = serializers.CharField(max_length=200, write_only=True)
+class VerifyOTPSerializer(OTPSerializer):
     otp = serializers.CharField(max_length=10, write_only=True)

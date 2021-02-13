@@ -65,3 +65,23 @@ Local Development
 ### Running locally
 
     $ poetry run python api/manage.py runserver
+
+
+## Testing
+
+For the testing, we are using `pytest` and [`pytest-django`](https://github.com/pytest-dev/pytest-django).
+
+### Run Tests
+
+```bash
+poetry run pytest
+```
+
+or if you are inside virtaulenv, simply just:
+
+```bash
+pytest
+```
+
+
+
