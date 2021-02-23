@@ -65,7 +65,9 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class OTPSerializer(serializers.Serializer):
-    destination = serializers.CharField(max_length=200, write_only=True)
+    destination = serializers.CharField(max_length=200)
+    send_counter = serializers.IntegerField(read_only=True)
+    is_verified = serializers.BooleanField(read_only=True)
 
 
 class VerifyOTPSerializer(OTPSerializer):

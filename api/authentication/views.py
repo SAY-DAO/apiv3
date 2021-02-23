@@ -49,7 +49,7 @@ class LoginView(views.APIView):
         else:
             return Response(
                 serialized_data.errors,
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                status=status.HTTP_400_BAD_REQUEST
             )
 
 
@@ -65,7 +65,7 @@ class OTPView(views.APIView):
         if not serialized_data.is_valid():
             return Response(
                 serialized_data.errors,
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         destination = serialized_data.validated_data['destination']
@@ -83,7 +83,7 @@ class OTPView(views.APIView):
                 except exceptions.ValidationError:
                     return Response(
                         {'destination': _('destination is not a valid email/phone.')},
-                        status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                        status=status.HTTP_400_BAD_REQUEST
                     )
 
             secret = pyotp.random_base32()
@@ -112,7 +112,7 @@ class OTPView(views.APIView):
                 otp.destination,
             )
 
-        return Response(_('Verification sent to %(destination)s.' % {'destination': destination}))
+        return Response(serializers.OTPSerializer(otp).data)
 
 
 class VerifyOTPView(views.APIView):
@@ -127,7 +127,7 @@ class VerifyOTPView(views.APIView):
         if not serialized_data.is_valid():
             return Response(
                 serialized_data.errors,
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         destination = serialized_data.validated_data['destination']
@@ -138,20 +138,20 @@ class VerifyOTPView(views.APIView):
         except OTPValidation.DoesNotExists:
             return Response(
                 {'destination': _('destination is not a valid email/phone.')},
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         if not otp.is_valid(code):
             return Response(
                 {'code': _('OTP code is invalid.')},
-                status=status.HTTP_422_UNPROCESSABLE_ENTITY
+                status=status.HTTP_400_BAD_REQUEST
             )
 
         otp.is_verified = True
         otp.verified_date = datetime.utcnow()
         otp.save()
 
-        return Response(_('%(destination)s verified.' % {'destination': destination}))
+        return Response(serializers.OTPSerializer(otp).data)
 
 
 class RegisterViewSet(mixins.CreateModelMixin,
