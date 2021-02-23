@@ -16,6 +16,7 @@ djangorestframework-camel-case = "^1.2.0"
 Jinja2 = "^2.11.2"
 pyotp = "^2.5.1"
 django-redis = "^4.12.1"
+email_normalize = "^2.0.0"
 
 [tool.poetry.dev-dependencies]
 pudb = "^2020.1"

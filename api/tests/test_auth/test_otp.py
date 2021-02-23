@@ -80,3 +80,22 @@ def test_wrong_destination(api_client, destination):
         )
     )
     assert response.status_code == 400
+
+
+@pytest.mark.parametrize(
+    'destination',
+    [
+        'test@GmAil.COM',
+        't.est@gmail.COM',
+        'test+test@gmail.COM',
+    ],
+)
+def test_normalize_email(api_client, destination):
+    response = api_client().post(
+        endpoint,
+        data=dict(
+            destination=destination,
+        )
+    )
+    assert response.status_code == 200
+    assert response.data['destination'] == 'test@gmail.com'

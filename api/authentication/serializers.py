@@ -1,3 +1,4 @@
+import email_normalize
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -68,6 +69,17 @@ class OTPSerializer(serializers.Serializer):
     destination = serializers.CharField(max_length=200)
     send_counter = serializers.IntegerField(read_only=True)
     is_verified = serializers.BooleanField(read_only=True)
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+
+        try:
+            normalized_email = email_normalize.normalize(attrs['destination'])
+            validated_data['destination'] = normalized_email.normalized_address
+        except ValueError:
+            pass
+
+        return validated_data
 
 
 class VerifyOTPSerializer(OTPSerializer):
