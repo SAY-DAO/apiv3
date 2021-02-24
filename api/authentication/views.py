@@ -3,6 +3,7 @@ from django.conf import settings
 from django.core import exceptions
 from django.core.mail import send_mail
 from django.core.validators import validate_email
+from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.utils.translation import gettext_lazy as _
 from rest_framework import mixins
@@ -30,7 +31,7 @@ class LoginView(views.APIView):
 
     def validated(self, serialized_data, *args, **kwargs):
         user = serialized_data.user
-        user.last_login = datetime.utcnow()
+        user.last_login = timezone.now()
         user.save()
 
         AuthTransaction(

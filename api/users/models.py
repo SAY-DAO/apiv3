@@ -1,3 +1,4 @@
+import email_normalize
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
@@ -40,7 +41,8 @@ class User(AbstractUser):
     )
     is_phone_verified = models.BooleanField(default=False)
 
-    email = models.EmailField(blank=True,null=True, unique=True)
+    email = models.EmailField(blank=True, null=True, unique=True)
+    normalized_email = models.EmailField(blank=True, null=True, unique=True)
     is_email_verified = models.BooleanField(default=False, null=True)
 
     objects = UserManager()
@@ -56,6 +58,12 @@ class User(AbstractUser):
 
     def save(self, *args, **kwargs):
         self.slug_username = slugify(self.username)
+
+        try:
+            self.normalized_email = email_normalize.normalize(self.email).normalized_address
+        except ValueError:
+            pass
+
         super().save(*args, **kwargs)
 
     @classmethod
@@ -71,6 +79,7 @@ class User(AbstractUser):
             user.phone = v2_user.phone_number
             user.is_phone_verified = v2_user.is_phonenumber_verified
             user.email = v2_user.emailaddress
+            user.normalized_email = email_normalize.normalize(v2_user.emailaddress).normalized_address
             user.is_email_verified = v2_user.is_email_verified
             user.password = v2_user.field_password
             user.first_name = v2_user.firstname

@@ -1,4 +1,6 @@
 import email_normalize
+from django.db.models import Q
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
@@ -16,9 +18,24 @@ class LoginSerializer(serializers.Serializer):
     refresh = serializers.CharField(read_only=True)
 
     def validate(self, attrs):
+        handle = attrs['username']
+
+        possible_email = ''
         try:
-            user = User.objects.get(slug_username=attrs['username'].lower())
-        except User.DoesNotExist:
+            possible_email = email_normalize.normalize(handle).normalized_address
+        except ValueError:
+            pass
+
+        user = get_or_none(
+            User,
+            Q(
+                Q(slug_username=slugify(handle))
+                | (Q(normalized_email=possible_email) & Q(is_email_verified=True))
+                | (Q(phone=handle) & Q(is_phone_verified=True))
+            ),
+        )
+
+        if user is None:
             raise serializers.ValidationError(_('Invalid username or password'))
 
         if not user.check_password(attrs['password']):
@@ -38,8 +55,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
-        # super(RegisterSerializer, self).validate(data)
-
         if not data.get('email') and not data.get('phone'):
             raise serializers.ValidationError(_('one of email or phone must is requeired'))
 
