@@ -5,7 +5,8 @@ from django.utils.translation import gettext_lazy as _
 
 from users.models import User
 from .constants import DESTINATION_CHOICES
-from .constants import EMAIL, PHONE
+from .constants import EMAIL
+from .constants import PHONE
 
 
 class AuthTransaction(models.Model):

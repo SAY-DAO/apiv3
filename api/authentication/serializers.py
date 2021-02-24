@@ -5,8 +5,8 @@ from rest_framework import serializers
 from common.get_or_none import get_or_none
 from users.models import User
 from users.utils import make_password
-from .utils import get_tokens_for_user
 from . import models
+from .utils import get_tokens_for_user
 
 
 class LoginSerializer(serializers.Serializer):

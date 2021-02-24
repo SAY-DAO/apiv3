@@ -1,7 +1,7 @@
-from django.urls import reverse
 import pytest
-from authentication import models
+from django.urls import reverse
 
+from authentication import models
 
 pytestmark = pytest.mark.django_db
 endpoint = reverse('authentication:otp')

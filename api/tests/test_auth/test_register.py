@@ -1,8 +1,8 @@
-from django.urls import reverse
 import pytest
-from authentication.models import OTPValidation
+from django.urls import reverse
 from model_bakery import baker
 
+from authentication.models import OTPValidation
 from users.models import User
 
 pytestmark = pytest.mark.django_db
