@@ -7,7 +7,6 @@ from . import views
 router = DefaultRouter()
 router.register(r'register', views.RegisterViewSet, basename='register')
 
-
 app_name = 'authentication'
 
 urlpatterns = [
@@ -17,4 +16,3 @@ urlpatterns = [
 ]
 
 urlpatterns += router.urls
-

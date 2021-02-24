@@ -38,6 +38,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         extra_kwargs = {'password': {'write_only': True}}
 
     def validate(self, data):
+        # super(RegisterSerializer, self).validate(data)
+
         if not data.get('email') and not data.get('phone'):
             raise serializers.ValidationError(_('one of email or phone must is requeired'))
 
