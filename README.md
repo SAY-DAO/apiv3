@@ -1,5 +1,8 @@
-# apiv3
+# API-V3
+
 Refactored version of the backend using django
+
+![Test Badge](https://github.com/SAY-DAO/apiv3/actions/workflows/test.yml/badge.svg?branch=main)
 
 ## TODOs
 - Readme
