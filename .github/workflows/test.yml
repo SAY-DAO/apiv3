@@ -47,10 +47,8 @@ jobs:
       - name: Install dependencies
         run: poetry install
       - name: Run tests
-        run: poetry run pytest -vv --cov=./ --cov-report=xml
+        run: poetry run pytest -vv --cov=./
       - name: Coveralls
         uses: coverallsapp/github-action@master
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          path-to-lcov: coverage.xml
-
