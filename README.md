@@ -3,6 +3,7 @@
 Refactored version of the backend using django
 
 ![Test Badge](https://github.com/SAY-DAO/apiv3/actions/workflows/test.yml/badge.svg?branch=main)
+[![codecov](https://codecov.io/gh/SAY-DAO/apiv3/branch/main/graph/badge.svg?token=EYWHKLELQG)](https://codecov.io/gh/SAY-DAO/apiv3)
 
 ## TODOs
 - Readme
