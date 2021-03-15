@@ -1,26 +1,25 @@
+from urllib.parse import urljoin
+
 import pyotp
 from django.conf import settings
+from django.core.mail import send_mail
 from django.db import models
+from django.template.loader import render_to_string
 from django.utils.translation import gettext_lazy as _
 
+from common.mixins.timestamp import TimestampMixin
 from users.models import User
 from .constants import DESTINATION_CHOICES
 from .constants import EMAIL
 from .constants import PHONE
+from common.sms import send_sms
 
 
-class AuthTransaction(models.Model):
+class AuthTransaction(models.Model, TimestampMixin):
     ip_address = models.GenericIPAddressField(blank=False, null=False)
-    token = models.TextField(verbose_name=_('JWT Token passed'))
     session = models.TextField(verbose_name=_('Session Passed'))
-    create_date = models.DateTimeField(
-        verbose_name=_('Create Date/Time'),
-        auto_now_add=True,
-    )
-    update_date = models.DateTimeField(
-        verbose_name=_('Date/Time Modified'),
-        auto_now=True,
-    )
+    token = models.TextField(verbose_name=_('JWT Token passed'))
+
     created_by = models.ForeignKey(to=User, on_delete=models.PROTECT)
 
     def __str__(self):
@@ -31,26 +30,26 @@ class AuthTransaction(models.Model):
         verbose_name_plural = _('Authentication Transactions')
 
 
-class OTPValidation(models.Model):
+class OTPValidation(models.Model, TimestampMixin):
+    created_at = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
     destination = models.CharField(
         verbose_name=_('Destination Address (Mobile/EMail)'),
         max_length=254,
         unique=True,
     )
-    create_date = models.DateTimeField(verbose_name=_('Create Date'), auto_now_add=True)
-    verify_date = models.DateTimeField(verbose_name=_('Date Verified'), null=True)
-    is_verified = models.BooleanField(verbose_name=_('Is Verified'), default=False)
     destination_type = models.CharField(
         verbose_name=_('Destination Type'),
         default=EMAIL,
         max_length=10,
         choices=DESTINATION_CHOICES,
     )
+    is_verified = models.BooleanField(verbose_name=_('Is Verified'), default=False)
     secret = models.CharField(
         verbose_name=_('OTP Secret'),
         max_length=128,
     )
     send_counter = models.IntegerField(verbose_name=_('OTP Sent Counter'), default=0)
+    verify_date = models.DateTimeField(verbose_name=_('Date Verified'), null=True)
 
     def __str__(self):
         return f'{self.destination} otp'
@@ -80,7 +79,7 @@ class OTPValidation(models.Model):
                     is_verified=True,
                     destination_type=EMAIL,
                     verify_date=make_aware(v2_user.created),
-                    create_date=make_aware(v2_user.created),
+                    created_at=make_aware(v2_user.created),
                     send_counter=1,
                     secret=pyotp.random_base32(),
                 )
@@ -92,8 +91,45 @@ class OTPValidation(models.Model):
                     is_verified=True,
                     destination_type=PHONE,
                     verify_date=make_aware(v2_user.created),
-                    create_date=make_aware(v2_user.created),
+                    created_at=make_aware(v2_user.created),
                     send_counter=1,
                     secret=pyotp.random_base32(),
                 )
                 otp.save()
+
+
+class ResetPassword(models.Model, TimestampMixin):
+    token = models.CharField(max_length=10, unique=True)
+    destination = models.CharField(
+        verbose_name=_('Destination Address (Mobile/EMail)'),
+        max_length=254,
+        unique=True,
+    )
+    destination_type = models.CharField(
+        verbose_name=_('Destination Type'),
+        default=EMAIL,
+        max_length=10,
+        choices=DESTINATION_CHOICES,
+    )
+
+    @property
+    def link(self):
+        return urljoin(
+            settings.BASE_URL,
+            settings.SET_PASSWORD_URL + f'?token={self.token}'
+        )
+
+    def send_email(self):
+        # Fix i18n
+        send_mail(
+            _('SAY Change Password'),
+            render_to_string('reset_password.html', {'link': self.link}),
+            recepiant_list=[self.destination],
+            fail_silently=False,
+        )
+
+    def send_sms(self):
+        send_sms(
+            self.destination,
+            _('Click on the link below to change your password.\n%s') % self.link
+        )

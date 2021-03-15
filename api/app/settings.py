@@ -30,6 +30,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 
@@ -74,7 +75,8 @@ REST_FRAMEWORK = {
     ],
     'DEFAULT_THROTTLE_RATES': {
         'send_otp': '100/minute',
-        'verify_otp': '50/minute'
+        'verify_otp': '300/minute',
+        'request_reset_password': '100/minute',
     }
 
 }
@@ -252,3 +254,6 @@ SPECTACULAR_SETTINGS = {
     'SCHEMA_PATH_PREFIX': r'/api/v[0-9]+',
 }
 
+# Reset Password
+RESET_PASSWORD_TOKEN_LENGTH = 10
+SET_PASSWORD_URL = 'setpassword'

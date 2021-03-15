@@ -70,7 +70,7 @@ def test_login_by_normalize_email(api_client, faker):
     response = api_client().post(
         endpoint,
         data=dict(
-            username=user.email.replace('gmail', 'GmaIL'),
+            username=user.email.replace('gmail', 'G'),
             password=raw_password,
         )
     )

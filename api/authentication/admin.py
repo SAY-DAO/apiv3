@@ -13,7 +13,7 @@ class OTPValidationAdmin(admin.ModelAdmin):
 class AuthTransactionAdmin(admin.ModelAdmin):
     """AuthTransaction Admin"""
 
-    list_display = ('created_by', 'ip_address', 'create_date')
+    list_display = ('created_by', 'ip_address', 'created_at')
 
     def has_add_permission(self, request):
         """Limits admin to add an object."""

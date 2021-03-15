@@ -94,6 +94,7 @@ class OTPSerializer(serializers.Serializer):
             normalized_email = email_normalize.normalize(attrs['destination'])
             validated_data['destination'] = normalized_email.normalized_address
         except ValueError:
+            # destination can be phone number
             pass
 
         return validated_data
@@ -101,3 +102,19 @@ class OTPSerializer(serializers.Serializer):
 
 class VerifyOTPSerializer(OTPSerializer):
     otp = serializers.CharField(max_length=10, write_only=True)
+
+
+class ResetPasswordSerializer(serializers.Serializer):
+    destination = serializers.CharField(max_length=200)
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+
+        try:
+            normalized_email = email_normalize.normalize(attrs['destination'])
+            validated_data['destination'] = normalized_email.normalized_address
+        except ValueError:
+            # destination can be phone number
+            pass
+
+        return validated_data

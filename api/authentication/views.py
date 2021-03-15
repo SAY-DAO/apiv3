@@ -1,3 +1,5 @@
+import secrets
+
 import pyotp
 from django.conf import settings
 from django.core import exceptions
@@ -19,6 +21,7 @@ from .constants import EMAIL
 from .constants import PHONE
 from .models import AuthTransaction
 from .models import OTPValidation
+from .models import ResetPassword
 from .utils import generate_otp
 from .utils import get_client_ip
 
@@ -94,9 +97,6 @@ class OTPView(views.APIView):
                 destination_type=destination_type,
             )
 
-        otp.send_counter += 1
-        otp.save()
-
         code = generate_otp(otp.secret)
 
         if otp.destination_type == EMAIL:
@@ -112,6 +112,9 @@ class OTPView(views.APIView):
                 _('SAY verification code: %(code)s' % {'code': code}),
                 otp.destination,
             )
+
+        otp.send_counter += 1
+        otp.save()
 
         return Response(serializers.OTPSerializer(otp).data)
 
@@ -161,3 +164,41 @@ class RegisterViewSet(mixins.CreateModelMixin,
     serializer_class = serializers.RegisterSerializer
     permission_classes = ()
     authentication_classes = ()
+
+
+class ResetPaswordView(views.APIView):
+    serializer_class = serializers.ResetPasswordSerializer
+    permission_classes = ()
+    authentication_classes = ()
+    throttle_scope = 'request_reset_password'
+
+    def post(self, request):
+        serialized_data = self.serializer_class(data=request.data)
+
+        if not serialized_data.is_valid():
+            return Response(
+                serialized_data.errors,
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        destination = serialized_data.validated_data['destination']
+        reset_password = ResetPassword(
+            destination=destination,
+            token=secrets.token_urlsafe()[:settings.RESET_PASSWORD_TOKEN_LENGTH]
+        )
+
+        try:
+            validate_email(destination)
+            reset_password.destination_type = EMAIL
+        except exceptions.ValidationError:
+            try:
+                User.phone_regex(destination)
+                reset_password.destination_type = PHONE
+            except exceptions.ValidationError:
+                return Response(
+                    {'destination': _('destination is not a valid email/phone.')},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+
+        reset_password.save()
+        return Response(serializers.OTPSerializer(reset_password).data)
