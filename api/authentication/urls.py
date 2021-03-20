@@ -13,6 +13,7 @@ urlpatterns = [
     path('otp/', views.OTPView.as_view(), name='otp'),
     path('otp/verify/', views.VerifyOTPView.as_view(), name='verify_otp'),
     path('reset-password/', views.ResetPaswordView.as_view(), name='reset-password'),
+    path('reset-password/confirm', views.ConfirmResetPaswordView.as_view(), name='confirm-reset-password'),
 ]
 
 urlpatterns += router.urls

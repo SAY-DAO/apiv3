@@ -18,6 +18,7 @@ from django.utils.translation import gettext_lazy as _
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+BASE_URL = 'http://localhost:8000'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/
@@ -45,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework.authtoken',
     'django.contrib.sites',
+    'app',
     'v2',
     'authentication',
     'users',
@@ -76,7 +78,8 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'send_otp': '100/minute',
         'verify_otp': '300/minute',
-        'request_reset_password': '100/minute',
+        'reset_password': '100/minute',
+        'confirm_reset_password': '100/minute',
     }
 
 }
@@ -162,12 +165,6 @@ AUTH_PASSWORD_VALIDATORS = [
             'min_length': 6,
         },
     },
-    {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
-    },
-    {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
-    },
 ]
 
 # Internationalization
@@ -210,6 +207,7 @@ OTP_DIGITS = 6
 # email
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 VERIFICATION_EMAIL_FROM = 'confirm@say.company'
+DEFAULT_FROM_EMAIL = 'confirm@say.company'
 
 # SMS
 SMS_BACKEND = 'common.sms.backends.console.ConsoleSMSBackend'
@@ -257,3 +255,4 @@ SPECTACULAR_SETTINGS = {
 # Reset Password
 RESET_PASSWORD_TOKEN_LENGTH = 10
 SET_PASSWORD_URL = 'setpassword'
+RESET_PASSWORD_TTL = 300  # seconds

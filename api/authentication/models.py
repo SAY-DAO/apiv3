@@ -1,18 +1,22 @@
+from datetime import timedelta
 from urllib.parse import urljoin
 
 import pyotp
 from django.conf import settings
 from django.core.mail import send_mail
 from django.db import models
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.template.loader import render_to_string
+from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from common.mixins.timestamp import TimestampMixin
+from common.sms import send_sms
 from users.models import User
 from .constants import DESTINATION_CHOICES
 from .constants import EMAIL
 from .constants import PHONE
-from common.sms import send_sms
 
 
 class AuthTransaction(models.Model, TimestampMixin):
@@ -98,6 +102,10 @@ class OTPValidation(models.Model, TimestampMixin):
                 otp.save()
 
 
+def get_reset_password_expire_date():
+    return timezone.now() + timedelta(seconds=settings.RESET_PASSWORD_TTL)
+
+
 class ResetPassword(models.Model, TimestampMixin):
     token = models.CharField(max_length=10, unique=True)
     destination = models.CharField(
@@ -111,6 +119,10 @@ class ResetPassword(models.Model, TimestampMixin):
         max_length=10,
         choices=DESTINATION_CHOICES,
     )
+    expired_at = models.DateTimeField(default=get_reset_password_expire_date)
+    is_used = models.BooleanField(default=False)
+
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
 
     @property
     def link(self):
@@ -124,7 +136,8 @@ class ResetPassword(models.Model, TimestampMixin):
         send_mail(
             _('SAY Change Password'),
             render_to_string('reset_password.html', {'link': self.link}),
-            recepiant_list=[self.destination],
+            settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[self.destination],
             fail_silently=False,
         )
 
@@ -133,3 +146,14 @@ class ResetPassword(models.Model, TimestampMixin):
             self.destination,
             _('Click on the link below to change your password.\n%s') % self.link
         )
+
+    def send(self):
+        if self.destination_type == EMAIL:
+            self.send_email()
+        else:
+            self.send_sms()
+
+
+@receiver(post_save, sender=ResetPassword)
+def send_reset_password_link(sender, instance, **kwargs):
+    instance.send()

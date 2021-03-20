@@ -1,5 +1,8 @@
 import email_normalize
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 from django.db.models import Q
+from django.utils import timezone
 from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
@@ -8,6 +11,7 @@ from common.get_or_none import get_or_none
 from users.models import User
 from users.utils import make_password
 from . import models
+from .models import ResetPassword
 from .utils import get_tokens_for_user
 
 
@@ -117,4 +121,31 @@ class ResetPasswordSerializer(serializers.Serializer):
             # destination can be phone number
             pass
 
+        return validated_data
+
+
+class ConfirmResetPasswordSerializer(serializers.Serializer):
+    password = serializers.CharField(max_length=2000, write_only=True)
+    token = serializers.CharField(max_length=200)
+
+    def validate(self, attrs):
+        validated_data = super().validate(attrs)
+        try:
+            validate_password(password=validated_data['password'])
+        except ValidationError as ex:
+            raise serializers.ValidationError(dict(password=ex.error_list[0]))
+
+        reset_password = get_or_none(
+            ResetPassword,
+            token=validated_data['token'],
+            is_used=False,
+            expired_at__gte=timezone.now(),
+        )
+        if reset_password is None:
+            raise serializers.ValidationError(dict(token=_('Token not found')))
+
+        reset_password.user.set_password(raw_password=validated_data['password'])
+        reset_password.user.save()
+        reset_password.is_used = True
+        reset_password.save()
         return validated_data

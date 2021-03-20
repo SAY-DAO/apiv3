@@ -14,6 +14,7 @@ from rest_framework import views
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+from common.get_or_none import get_or_none
 from common.sms import send_sms
 from users.models import User
 from . import serializers
@@ -142,13 +143,13 @@ class VerifyOTPView(views.APIView):
         except OTPValidation.DoesNotExists:
             return Response(
                 {'destination': _('destination is not a valid email/phone.')},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         if not otp.is_valid(code):
             return Response(
                 {'code': _('OTP code is invalid.')},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         otp.is_verified = True
@@ -167,9 +168,9 @@ class RegisterViewSet(mixins.CreateModelMixin,
 
 
 class ResetPaswordView(views.APIView):
-    serializer_class = serializers.ResetPasswordSerializer
-    permission_classes = ()
     authentication_classes = ()
+    permission_classes = ()
+    serializer_class = serializers.ResetPasswordSerializer
     throttle_scope = 'request_reset_password'
 
     def post(self, request):
@@ -178,13 +179,13 @@ class ResetPaswordView(views.APIView):
         if not serialized_data.is_valid():
             return Response(
                 serialized_data.errors,
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_400_BAD_REQUEST,
             )
 
         destination = serialized_data.validated_data['destination']
         reset_password = ResetPassword(
             destination=destination,
-            token=secrets.token_urlsafe()[:settings.RESET_PASSWORD_TOKEN_LENGTH]
+            token=secrets.token_urlsafe()[:settings.RESET_PASSWORD_TOKEN_LENGTH],
         )
 
         try:
@@ -197,8 +198,37 @@ class ResetPaswordView(views.APIView):
             except exceptions.ValidationError:
                 return Response(
                     {'destination': _('destination is not a valid email/phone.')},
-                    status=status.HTTP_400_BAD_REQUEST
+                    status=status.HTTP_400_BAD_REQUEST,
                 )
 
+        if reset_password.destination_type == EMAIL:
+            user = get_or_none(User, email=reset_password.destination)
+        else:
+            user = get_or_none(User, phone=reset_password.destination)
+
+        if user is None:
+            return Response(
+                {'destination': _('destination not found.')},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        reset_password.user = user
         reset_password.save()
-        return Response(serializers.OTPSerializer(reset_password).data)
+        return Response(serializers.ResetPasswordSerializer(reset_password).data)
+
+
+class ConfirmResetPaswordView(views.APIView):
+    authentication_classes = ()
+    permission_classes = ()
+    serializer_class = serializers.ConfirmResetPasswordSerializer
+    throttle_scope = 'confirm_reset_password'
+
+    def post(self, request):
+        serialized_data = self.serializer_class(data=request.data)
+        if not serialized_data.is_valid():
+            return Response(
+                serialized_data.errors,
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        return Response()
