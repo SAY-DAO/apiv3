@@ -10,5 +10,4 @@ def is_token_blacklisted(jti: str):
 
 
 def blacklist_token(jti: str, ttl: int):
-    from pudb import set_trace; set_trace()
     return redis.set(TOKEN_KEY % jti, 1, ttl)

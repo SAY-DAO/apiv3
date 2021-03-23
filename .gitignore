@@ -56,3 +56,7 @@ _build/
 
 # Celery
 celerybeat-schedule
+
+# Rope
+.rope/
+.ropeproject/
