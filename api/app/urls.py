@@ -19,7 +19,6 @@ from django.urls import path
 from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularRedocView
 from drf_spectacular.views import SpectacularSwaggerView
-from rest_framework_simplejwt.views import TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -32,8 +31,6 @@ urlpatterns = [
             # users
             path('users/', include('users.urls')),
 
-            # JWT
-            path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
         ]))
     ])),
 

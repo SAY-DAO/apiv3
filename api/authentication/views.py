@@ -9,6 +9,7 @@ from django.utils import timezone
 from django.utils.datetime_safe import datetime
 from django.utils.translation import gettext_lazy as _
 from rest_framework import mixins
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework import views
 from rest_framework import viewsets
@@ -18,6 +19,7 @@ from common.get_or_none import get_or_none
 from common.sms import send_sms
 from users.models import User
 from . import serializers
+from .blacklist import blacklist_token
 from .constants import EMAIL
 from .constants import PHONE
 from .models import AuthTransaction
@@ -56,6 +58,17 @@ class LoginView(views.APIView):
                 serialized_data.errors,
                 status=status.HTTP_400_BAD_REQUEST
             )
+
+
+class LogoutView(views.APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+
+    def post(self, request):
+        blacklist_token(
+            jti=request.auth['jti'],
+            ttl=int(request.auth['exp'] - datetime.utcnow().timestamp()) + 1,
+        )
+        return Response(_('Token blacklisted'))
 
 
 class OTPView(views.APIView):

@@ -1,9 +1,9 @@
-import email_normalize
 from django.contrib.auth.models import AbstractUser
 from django.core.validators import RegexValidator
 from django.db import models
 from django.utils.text import slugify
 
+from common.utils import email_normalizer
 from .managers import UserManager
 from .utils import check_password
 from .utils import make_password
@@ -60,7 +60,7 @@ class User(AbstractUser):
         self.slug_username = slugify(self.username)
 
         try:
-            self.normalized_email = email_normalize.normalize(self.email).normalized_address
+            self.normalized_email = email_normalizer(self.email)
         except ValueError:
             pass
 
@@ -79,7 +79,7 @@ class User(AbstractUser):
             user.phone = v2_user.phone_number
             user.is_phone_verified = v2_user.is_phonenumber_verified
             user.email = v2_user.emailaddress
-            user.normalized_email = email_normalize.normalize(v2_user.emailaddress).normalized_address
+            user.normalized_email = email_normalizer(v2_user.emailaddress)
             user.is_email_verified = v2_user.is_email_verified
             user.password = v2_user.field_password
             user.first_name = v2_user.firstname

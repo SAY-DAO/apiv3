@@ -1,4 +1,3 @@
-import email_normalize
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db.models import Q
@@ -8,6 +7,7 @@ from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
 from common.get_or_none import get_or_none
+from common.utils import email_normalizer
 from users.models import User
 from users.utils import make_password
 from . import models
@@ -26,7 +26,7 @@ class LoginSerializer(serializers.Serializer):
 
         possible_email = ''
         try:
-            possible_email = email_normalize.normalize(handle).normalized_address
+            possible_email = email_normalizer(handle)
         except ValueError:
             pass
 
@@ -95,8 +95,7 @@ class OTPSerializer(serializers.Serializer):
         validated_data = super().validate(attrs)
 
         try:
-            normalized_email = email_normalize.normalize(attrs['destination'])
-            validated_data['destination'] = normalized_email.normalized_address
+            validated_data['destination'] = email_normalizer(attrs['destination'])
         except ValueError:
             # destination can be phone number
             pass
@@ -115,8 +114,7 @@ class ResetPasswordSerializer(serializers.Serializer):
         validated_data = super().validate(attrs)
 
         try:
-            normalized_email = email_normalize.normalize(attrs['destination'])
-            validated_data['destination'] = normalized_email.normalized_address
+            validated_data['destination'] = email_normalizer(attrs['destination'])
         except ValueError:
             # destination can be phone number
             pass
