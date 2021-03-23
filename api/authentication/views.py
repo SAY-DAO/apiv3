@@ -184,7 +184,7 @@ class ResetPaswordView(views.APIView):
     authentication_classes = ()
     permission_classes = ()
     serializer_class = serializers.ResetPasswordSerializer
-    throttle_scope = 'request_reset_password'
+    throttle_scope = 'reset_password'
 
     def post(self, request):
         serialized_data = self.serializer_class(data=request.data)
