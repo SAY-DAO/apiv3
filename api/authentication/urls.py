@@ -17,6 +17,21 @@ urlpatterns = [
     path('reset-password/', views.ResetPaswordView.as_view(), name='reset-password'),
     path('reset-password/confirm', views.ConfirmResetPaswordView.as_view(), name='confirm-reset-password'),
     path('refresh/', TokenRefreshView.as_view(), name='token_refresh'),  # JWT
+    path(
+        'available/username/<str:handle>',
+        views.AvailableUsernameView.as_view(),
+        name='available_username',
+    ),
+    path(
+        'available/email/<str:handle>',
+        views.AvailableEmailView.as_view(),
+        name='available_email',
+    ),
+    path(
+        'available/phone/<str:handle>',
+        views.AvailablePhoneView.as_view(),
+        name='available_phone',
+    ),
 ]
 
 urlpatterns += router.urls

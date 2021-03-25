@@ -7,7 +7,9 @@ from django.core.mail import send_mail
 from django.core.validators import validate_email
 from django.utils import timezone
 from django.utils.datetime_safe import datetime
+from django.utils.text import slugify
 from django.utils.translation import gettext_lazy as _
+from rest_framework import generics
 from rest_framework import mixins
 from rest_framework import permissions
 from rest_framework import status
@@ -17,6 +19,7 @@ from rest_framework.response import Response
 
 from common.get_or_none import get_or_none
 from common.sms import send_sms
+from common.utils import email_normalizer
 from users.models import User
 from . import serializers
 from .blacklist import blacklist_token
@@ -245,3 +248,43 @@ class ConfirmResetPaswordView(views.APIView):
             )
 
         return Response()
+
+
+class AvailableViewBase(generics.GenericAPIView):
+    permission_classes = ()
+    authentication_classes = ()
+
+    def is_available(self, handle):
+        raise NotImplementedError()
+
+    def get(self, request, handle):
+        if not self.is_available(handle):
+            return Response(
+                _('Handle is not available'),
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        return Response(status=status.HTTP_200_OK)
+
+
+class AvailableUsernameView(AvailableViewBase):
+
+    def is_available(self, handle):
+        return not User.objects.filter(slug_username=slugify(handle)).exists()
+
+
+class AvailableEmailView(AvailableViewBase):
+
+    def is_available(self, handle):
+        try:
+            normalized_email = email_normalizer(handle)
+        except ValueError:
+            return False
+
+        return not User.objects.filter(normalized_email=normalized_email).exists()
+
+
+class AvailablePhoneView(AvailableViewBase):
+
+    def is_available(self, handle):
+        return not User.objects.filter(phone=handle).exists()
